@@ -1,0 +1,57 @@
+# OS
+Thumbs.db
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Python tooling (nebūtina)
+.pytest_cache/
+.mypy_cache/
+generate_pdf.py
+
+# Virtual environment
+venv/
+.venv/
+.env
+
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs & outputs
+*.log
+logs/audit/
+*.json
+!policy.json.example
+!pyproject.toml
+# Integrity (leidžiame commit'inti parašus)
+!*.sig
+!*.minisig
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# OSINT artifacts
+reports/
+data/
+results/
+
+# IDE
+.vscode/
+.idea/
+
+# Secrets (CRITICAL)
+*.key
+safestack.key
+.env
+secret.json
+.token
+

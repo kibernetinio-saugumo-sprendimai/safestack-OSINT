@@ -1,0 +1,11 @@
+{
+  "allowed_modes": ["passive"],
+  "denied_modules": [],
+  "module_modes": {
+    "tls.info": ["passive", "deep"],
+    "dns.passive": ["passive"]
+  },
+  "allowed_modules": null,
+  "allowed_targets": null,
+  "notes": "Standard passive reconnaissance policy."
+}
