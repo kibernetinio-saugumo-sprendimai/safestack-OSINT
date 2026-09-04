@@ -1,7 +1,7 @@
 # SafeStack OSINT – Galutinė Audito Ataskaita
 **Data ir laikas:** 2026-05-02 00:10:10 (Local Time)
 **Auditorius:** Antigravity AI  
-**Statusas:** ✅ **AUDIT PASSED / READY FOR PRODUCTION**
+**Statusas:** ⚠️ **HISTORINĖ ATASKAITA / NE PRODUKCINIS LEIDIMAS**
 
 ## 1. Tikslas ir Apimtis
 Šio audito tikslas buvo įvertinti **SafeStack OSINT** karkaso saugumą, architektūrinį vientisumą ir parengtumą „Root of Trust“ aplinkai. Audito metu buvo tikrinamas kodas, priklausomybės, konfigūracijų saugumas ir kriptografinio pasirašymo mechanizmai.
@@ -13,7 +13,7 @@
 | **Švara** | Buvo likę `legacy_core` ir pertekliniai skriptai. | Pašalinti visi nenaudojami failai ir katalogai. | **Gryna architektūra** |
 | **Reporting** | Logika buvo dubliuojama CLI lygmenyje. | Centralizuota ataskaitų generavimo logika branduolyje. | **Nuoseklumas** |
 | **Integrity** | Pasirašymas priklausė tik nuo išorinio įrankio. | Integruotas vidinis Ed25519 pasirašymo modulis. | **Autonominis saugumas** |
-| **Trust Chain** | Viešieji raktai buvo, bet nebuvo privataus rakto. | Integruotas **Root Private Key** (`safestack.key`). | **Root of Trust įtvirtintas** |
+| **Trust Chain** | Ankstesnis procesas tikėjosi privataus rakto repozitorijos kataloge. | Dabartinis procesas priima tik aiškiai nurodytą išorinį privatų raktą. | **Raktas atskirtas nuo Git** |
 | **Audit Log** | Nebuvo nuolatinio vykdymo žurnalizavimo. | Įdiegtas `AuditLogger`, fiksuojantis kiekvieną veiksmą. | **Pilnas atsekamumas** |
 | **Confidence** | Hardcoded balai (0.7). | Įdiegtas dinaminis pasitikėjimo balų skaičiavimas. | **Tikslus vertinimas** |
 
@@ -24,12 +24,12 @@ Sistema dabar naudoja hibridinį pasirašymo modelį:
 - **Raktų apsauga**: Privatus raktas yra apsaugotas griežtomis `.gitignore` taisyklėmis.
 
 ## 4. Rekomendacijos Naudotojui
-1. **Raktų valdymas**: Saugokite `safestack.key` neprisijungusioje (offline) laikmenoje, jei planuojate sistemą naudoti kritinėje infrastruktūroje.
+1. **Raktų valdymas**: Saugokite privatų pasirašymo raktą neprisijungusioje laikmenoje ir niekada nekopijuokite jo į repozitorijos katalogą.
 2. **Politikos kontrolė**: Reguliariai peržiūrėkite `policy.json` nustatymus, kad jie atitiktų jūsų organizacijos teisinius reikalavimus.
 3. **Atnaujinimai**: Prieš pridedant naujus modulius, visada vadovaukitės `docs/MODULES.md` gidu, kad išlaikytumėte architektūrinį švarumą.
 
 ## 5. Išvada
-**SafeStack OSINT** sėkmingai transformuotas iš prototipo į aukšto patikimumo, modulį karkasą. Sistema yra visiškai audituota, saugi ir paruošta vykdyti OSINT operacijas „Zero-Trust“ aplinkoje.
+Ši istorinė ataskaita negali patvirtinti dabartinio kodo produkcinio saugumo. Dabartinė versija turi būti vertinama pagal aktyvią politiką, testus, priklausomybių auditą ir konkretaus leidimo parašą.
 
 ---
-*Ši ataskaita yra kriptografiškai pasirašyta SafeStack parašo raktu.*
+*Šio failo teiginiai nėra produkcinė autorizacija.*

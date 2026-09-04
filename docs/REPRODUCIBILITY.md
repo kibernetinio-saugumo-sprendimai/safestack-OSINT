@@ -14,11 +14,11 @@ SafeStack OSINT strives for determinism where possible:
 To reproduce a scan exactly, the following must match:
 - **Version**: Check `CHANGELOG.md` or git tags for the specific release used.
 - **Policy**: Use the same `policy.json` file.
-- **Dependencies**: Ensure the same versions of `dnspython`, `requests`, and `minisign` are installed.
+- **Dependencies**: Install the exact versions pinned in `pyproject.toml`.
 
 ## 📋 Scan Context
 
-Each report includes a `meta` section with the `target_confidence` and `generated_at` timestamp. Always preserve the `.minisig` file alongside the report to maintain the chain of trust.
+Each report includes a `meta` section with the `target_confidence` and `generated_at` timestamp. When a report is signed, preserve its `.sig` file and the matching raw Ed25519 public key.
 
 ### Scanner Policies
 - **TLS Version**: The scanner enforces a minimum TLS version (default: TLS 1.2) during certificate retrieval. This can affect results if the target only supports older versions.

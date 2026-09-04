@@ -21,7 +21,7 @@ Projektas sąmoningai orientuotas ne į „kiekį“, o į:
 - Deterministinis **confidence scoring**
 - **Risk flags** ir **human-readable hints**
 - JSON ataskaitos
-- **Ataskaitų pasirašymas su minisign**
+- Ataskaitų pasirašymas SafeStack raw Ed25519 v1 formatu
 - Offline ataskaitų verifikacija
 
 ---
@@ -43,7 +43,7 @@ pip install -e .
 > pip install dnspython requests
 > ```
 >
-> Ataskaitų pasirašymui reikalingas `minisign` įrankis (atsisiųskite iš https://jedisct1.github.io/minisign/).
+> Tinklo moduliai nevykdomi be aiškaus `--policy` failo su leidžiamais moduliais, režimais ir tikslais.
 
 ----------
 
@@ -51,19 +51,19 @@ pip install -e .
 
 ### Vienas modulis:
 
-ss-osint run dns.passive example.com
+ss-osint run dns.live example.com --policy policy.json
 
 ### Visi moduliai:
 
-ss-osint run all example.com
+ss-osint run all example.com --policy policy.json
 
 ### Su politika:
 
-ss-osint run all example.com --policy policy.json
+ss-osint run all example.com --mode network --policy policy.json
 
 ### Alternatyvus paleidimas per Python:
 
-python -m cli.ss_osint run all example.com
+python -m cli.ss_osint run all example.com --policy policy.json
 
 ### Windows Shell paleidimas
 
@@ -86,20 +86,20 @@ ss-osint run all example.com --policy policy.json --report report.json
 ## Rezultatas:
 
 * report.json
-* report.json.sig (arba .minisig)
+* report.json.sig, tik jei pateiktas išorinis `--signing-key`
 
 #### 🔐 Report Verification (kritiškai svarbu)
 
---- SafeStack OSINT palaiko kriptografiškai pasirašytas ataskaitas.
+SafeStack OSINT palaiko aiškiai apibrėžtą raw Ed25519 v1 parašo formatą. Tai nėra Minisign formatas.
 
 Verifikacija (offline):
 
-minisign -V -m report.json -p safestack.pub
+python verify_raw_ed25519.py --message report.json --signature report.json.sig --public-key safestack.pub
 
 
 Jei viskas teisinga:
 
-Signature and comment signature verified
+Signature verified: SafeStack raw Ed25519 v1
 
 
 Tai garantuoja, kad:
@@ -157,8 +157,8 @@ Pavyzdžiai:
 ├── README.md
 ├── LICENSE
 ├── CHANGELOG.md
-├── safestack.key      # Privatus verifikavimo raktas (offline)
-└── safestack.pub      # Viešas verifikavimo raktas
+├── verify_raw_ed25519.py
+└── safestack.pub      # Viešas raw Ed25519 raktas
 
 ## 📚 Dokumentacija
 
@@ -177,4 +177,4 @@ rapid and non-linear development and **do not represent stable or coherent relea
 
 They are preserved for historical reference only.
 
-Versioning discipline and release guarantees start from **v1.5.0** onward.
+Versioning discipline starts from **v1.5.0**. Production readiness is not implied by a version number; it requires current tests, dependency review and a signed release decision.

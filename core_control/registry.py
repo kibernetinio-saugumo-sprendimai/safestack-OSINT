@@ -42,23 +42,19 @@ class ModuleRegistry:
         """
         policy = context.policy
 
+        if context.mode not in policy.allowed_modes or not policy.allows_target(context.target):
+            return False
+
         # 1. Explicit deny-list has highest priority
         if policy.denied_modules is not None:
             if module_name in policy.denied_modules:
                 return False
 
-        # 2. Per-module mode restrictions (e.g. tls.info -> deep only)
-        if policy.module_modes is not None:
-            allowed_modes = policy.module_modes.get(module_name)
-            if allowed_modes is not None:
-                return context.mode in allowed_modes
-
-        # 3. Global allow-list enforcement
-        if policy.allowed_modules is not None:
-            return module_name in policy.allowed_modules
-
-        # 4.  Default: allowed
-        return True
+        # 2. A module and its mode must both be explicitly allowed.
+        if module_name not in policy.allowed_modules:
+            return False
+        allowed_modes = policy.module_modes.get(module_name)
+        return allowed_modes is not None and context.mode in allowed_modes
 
     def get(self, module_name: str, context: Context) -> Type[ModuleContract]:
         """

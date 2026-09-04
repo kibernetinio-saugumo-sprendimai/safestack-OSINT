@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from core_control.reporting.signing import Signer
 from core_control.reporting.json_report import generate_json_report
 from core_control.policy import Policy
 from core_control.exceptions import ModuleExecutionError
@@ -10,7 +9,6 @@ from core_control.context import Context
 import sys
 import json
 import argparse
-import subprocess
 from pathlib import Path
 
 # Ensure project root is on PYTHONPATH
@@ -48,18 +46,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     run_parser.add_argument(
         "--mode",
-        default="passive",
-        help="Execution mode (default: passive)"
+        default="network",
+        help="Execution mode (default: network)"
     )
 
     run_parser.add_argument(
         "--policy",
-        help="Path to policy.json"
+        required=True,
+        help="Path to an explicit allow-list policy.json"
     )
 
     run_parser.add_argument(
         "--report",
         help="Write JSON report to file"
+    )
+
+    run_parser.add_argument(
+        "--signing-key",
+        help="External raw Ed25519 private-key file used to create report.json.sig"
     )
 
     run_parser.add_argument(
@@ -78,7 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def load_policy(path: str | None) -> Policy:
     if not path:
-        return Policy()
+        raise RuntimeError("An explicit --policy file is required")
 
     try:
         with open(path, "r") as f:
@@ -142,36 +146,23 @@ def main() -> int:
             with open(args.report, "w") as f:
                 json.dump(report_data, f, indent=2)
 
-            # Try internal signer first if safestack.key exists
-            key_path = PROJECT_ROOT / "safestack.key"
-            signed_internally = False
-
-            if key_path.exists():
+            if args.signing_key:
                 try:
-                    with open(key_path, "r") as kf:
+                    key_path = Path(args.signing_key).resolve(strict=True)
+                    if PROJECT_ROOT == key_path or PROJECT_ROOT in key_path.parents:
+                        raise ValueError("private signing key must be stored outside the repository")
+                    from core_control.reporting.signing import Signer
+                    with open(key_path, "r", encoding="ascii") as kf:
                         key_hex = kf.read().strip()
                     signer = Signer(key_hex)
-                    if signer.sign_report(args.report):
-                        print(
-                            "[INFO] Report signed using internal signer (Ed25519).")
-                        signed_internally = True
-                except Exception as e:
-                    print(
-                        f"[WARN] Internal signing failed: {e}", file=sys.stderr)
-
-            if not signed_internally:
-                # Fallback to minisign binary
-                try:
-                    subprocess.run(["minisign", "-v"],
-                                   capture_output=True, check=False)
-                    subprocess.run(
-                        ["minisign", "-S", "-m", args.report],
-                        check=True
-                    )
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    print(
-                        "[WARN] Report saved but signing failed: 'minisign' not found or failed.",
-                        file=sys.stderr)
+                    if not signer.sign_report(args.report):
+                        raise RuntimeError("signing failed")
+                    print("[INFO] Report signed using SafeStack raw Ed25519 v1 format.")
+                except Exception as exc:
+                    print(f"[ERROR] Report saved but signing failed: {exc}", file=sys.stderr)
+                    return 1
+            else:
+                print("[WARN] Report is unsigned; provide --signing-key for an authenticated artifact.", file=sys.stderr)
         else:
             print(json.dumps(report_data, indent=2))
 

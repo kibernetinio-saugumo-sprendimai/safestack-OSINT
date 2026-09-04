@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 class PassiveDNSModule:
     """
-    Real passive DNS resolver with fallback.
+    Live DNS resolver. This performs a network query and is not passive-history DNS.
     """
 
     def __init__(self, timeout: float = 3.0):
@@ -48,17 +48,16 @@ class PassiveDNSModule:
             }
 
         except dns.exception.Timeout:
-            return self._fallback(target, reason="timeout")
+            return self._error(target, reason="timeout")
 
         except dns.exception.DNSException as exc:
-            return self._fallback(target, reason=str(exc))
+            return self._error(target, reason=str(exc))
 
-    def _fallback(self, target: str, reason: str) -> Dict[str, Any]:
+    def _error(self, target: str, reason: str) -> Dict[str, Any]:
         return {
             "target": target,
-            "records": [
-                {"type": "A", "value": "93.184.216.34"}
-            ],
-            "note": f"fallback stub used ({reason})",
-            "source": "stub"
+            "records": [],
+            "error": "dns_failed",
+            "reason": reason,
+            "source": "local_dns"
         }

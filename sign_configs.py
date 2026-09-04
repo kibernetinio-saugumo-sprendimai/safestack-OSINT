@@ -1,46 +1,29 @@
-import os
+import argparse
 from pathlib import Path
+
 from core_control.reporting.signing import Signer
 
-def main():
-    # 1. Load the private key
-    key_path = Path("safestack.key")
-    if not key_path.exists():
-        print("[ERROR] safestack.key not found. Please create it first.")
-        return
 
-    with open(key_path, "r") as f:
-        key_hex = f.read().strip()
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Create SafeStack raw Ed25519 v1 signatures")
+    parser.add_argument("--signing-key", required=True, type=Path)
+    parser.add_argument("files", nargs="+")
+    args = parser.parse_args()
 
-    signer = Signer(key_hex)
+    project_root = Path(__file__).resolve().parent
+    key_path = args.signing_key.resolve(strict=True)
+    if project_root == key_path or project_root in key_path.parents:
+        raise SystemExit("private signing key must be outside the repository")
 
-    # 2. Files to sign
-    configs_to_sign = [
-        ".gitignore",
-        "pyproject.toml",
-        "README.md",
-        "policy.json.example",
-        "policy.json",
-        "setup_env.ps1",
-        "safestack.pub",
-        "LICENSE",
-        "Audit_Report.pdf"
-    ]
+    signer = Signer(key_path.read_text(encoding="ascii").strip())
+    for name in args.files:
+        path = Path(name).resolve(strict=True)
+        if not signer.sign_report(str(path)):
+            print(f"[FAILED] {path}")
+            return 1
+        print(f"[SIGNED] {path}.sig")
+    return 0
 
-    print(f"--- SafeStack Config Signing ---")
-    
-    for filename in configs_to_sign:
-        file_path = Path(filename)
-        if file_path.exists():
-            if signer.sign_report(str(file_path)):
-                print(f"[SUCCESS] Signed: {filename} -> {filename}.sig")
-            else:
-                print(f"[FAILED]  Could not sign: {filename}")
-        else:
-            # Skip if file doesn't exist (e.g. policy.json)
-            pass
-
-    print("\nAll available configurations have been signed.")
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

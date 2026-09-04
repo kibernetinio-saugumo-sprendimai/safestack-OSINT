@@ -8,29 +8,33 @@ Policies are defined in JSON files. Below are the available fields:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `allowed_modes` | `List[str]` | Global list of allowed execution modes (e.g., `["passive", "active"]`). |
+| `allowed_modes` | `List[str]` | Global explicit allow-list of execution modes; bundled network modules use `network`. |
 | `module_modes` | `Dict[str, List[str]]` | Per-module mode restrictions. Overrides global settings for specific modules. |
 | `allowed_modules`| `List[str]` | Explicit allow-list of modules. If defined, only these modules can run. |
 | `denied_modules` | `List[str]` | Explicit deny-list. These modules will NEVER run. |
-| `allowed_targets` | `List[str]` | (Optional) List of specific targets (domains/IPs) allowed for scanning. |
+| `allowed_targets` | `List[str]` | Required allow-list of exact domains, wildcard subdomains or IP networks. |
 | `notes` | `str` | Metadata for audit purposes (e.g., reason for the policy). |
 
 ## Example `policy.json`
 
 ```json
 {
-  "allowed_modes": ["passive"],
-  "denied_modules": ["dns.bruteforce"],
+  "allowed_modes": ["network"],
+  "allowed_modules": ["dns.live", "whois.rdap", "tls.info"],
+  "denied_modules": [],
   "module_modes": {
-    "tls.info": ["passive", "deep"]
+    "dns.live": ["network"],
+    "whois.rdap": ["network"],
+    "tls.info": ["network"]
   },
-  "notes": "Strict passive-only policy for external audits."
+  "allowed_targets": ["example.com", "*.example.com"],
+  "notes": "Explicitly authorized targets only."
 }
 ```
 
 ## Enforcement
 
-Policies are loaded by the CLI using the `--policy` flag:
+Policies are mandatory. Missing or empty allow-lists fail closed. The CLI loads them using `--policy`:
 
 ```bash
 ss-osint run all example.com --policy policy.json

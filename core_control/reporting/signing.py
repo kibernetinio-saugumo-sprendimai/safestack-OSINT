@@ -10,8 +10,10 @@ except ImportError:
 
 class Signer:
     """
-    Handles report signing using Ed25519.
-    Provides a fallback to minisign binary if cryptography is not installed.
+    Handles SafeStack raw Ed25519 v1 signatures.
+
+    This format is not Minisign and must be verified with the repository's
+    verify_raw_ed25519.py helper.
     """
 
     def __init__(self, private_key_hex: str = None):
@@ -41,14 +43,11 @@ class Signer:
             # Sign
             signature = privkey.sign(data)
 
-            # Save signature in a format compatible with minisign verification (simplified)
-            # Minisign signature format is more complex, but we can store the raw signature
-            # or a base64 version for manual verification.
             sig_path = Path(str(report_path) + ".sig")
 
             # For "Root of Trust" we use a simple header + base64 signature
             with open(sig_path, "w") as f:
-                f.write("untrusted comment: safestack signature\n")
+                f.write("untrusted comment: safestack raw ed25519 signature v1\n")
                 f.write(base64.b64encode(signature).decode() + "\n")
 
             return True

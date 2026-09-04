@@ -10,16 +10,11 @@ class PassiveDNSAdapter(ModuleContract):
     and exposes it via the core_control contract.
     """
 
-    name = "dns.passive"
+    name = "dns.live"
 
     def validate(self, context: Context) -> None:
-        policy = context.policy
-
-        if policy.allowed_modes is not None:
-            if context.mode not in policy.allowed_modes:
-                raise ValueError(
-                    f"Mode '{context.mode}' not allowed for module '{self.name}'"
-                )
+        if context.mode not in context.policy.allowed_modes:
+            raise ValueError(f"Mode '{context.mode}' not allowed for module '{self.name}'")
 
     def run(self, context: Context) -> Result:
         try:
@@ -44,8 +39,8 @@ class PassiveDNSAdapter(ModuleContract):
                     confidence = 1.0  # High certainty for NXDOMAIN
                 else:
                     confidence = 0.9  # Real DNS data
-            elif source == "stub":
-                confidence = 0.1  # Low certainty for stubs/fallbacks
+            if raw_data.get("error"):
+                confidence = 0.0
 
             return Result(
                 module=self.name,

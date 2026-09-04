@@ -1,11 +1,12 @@
 {
-  "allowed_modes": ["passive"],
+  "allowed_modes": ["network"],
   "denied_modules": [],
   "module_modes": {
-    "tls.info": ["passive", "deep"],
-    "dns.passive": ["passive"]
+    "tls.info": ["network"],
+    "dns.live": ["network"],
+    "whois.rdap": ["network"]
   },
-  "allowed_modules": null,
-  "allowed_targets": null,
-  "notes": "Standard passive reconnaissance policy."
+  "allowed_modules": ["dns.live", "whois.rdap", "tls.info"],
+  "allowed_targets": ["example.com", "*.example.com"],
+  "notes": "Explicit example policy. Replace the targets before use."
 }
