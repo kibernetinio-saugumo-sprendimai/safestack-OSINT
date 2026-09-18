@@ -41,3 +41,6 @@ class Policy:
 
         if self.module_modes is not None and not isinstance(self.module_modes, dict):
             raise ValueError("module_modes must be a dict")
+
+        if self.allowed_targets is not None and not isinstance(self.allowed_targets, list):
+            raise ValueError("allowed_targets must be a list")

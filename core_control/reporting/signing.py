@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from core_control.safeio import atomic_write, read_regular
 
 try:
     from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -35,8 +36,7 @@ class Signer:
                 private_bytes)
 
             # Read report data
-            with open(report_path, "rb") as f:
-                data = f.read()
+            data = read_regular(report_path)
 
             # Sign
             signature = privkey.sign(data)
@@ -47,9 +47,9 @@ class Signer:
             sig_path = Path(str(report_path) + ".sig")
 
             # For "Root of Trust" we use a simple header + base64 signature
-            with open(sig_path, "w") as f:
-                f.write("untrusted comment: safestack signature\n")
-                f.write(base64.b64encode(signature).decode() + "\n")
+            payload = ("untrusted comment: safestack signature\n" +
+                       base64.b64encode(signature).decode() + "\n").encode()
+            atomic_write(sig_path, payload, 0o600)
 
             return True
         except Exception:

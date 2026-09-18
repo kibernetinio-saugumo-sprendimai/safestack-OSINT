@@ -29,6 +29,20 @@ class SmokeTest(unittest.TestCase):
         except ImportError as e:
             self.fail(f"Import failed: {e}")
 
+    def test_policy_restricts_mode_and_target(self):
+        from core_control.context import Context
+        from core_control.policy import Policy
+        from core_control.exceptions import PolicyViolationError
+
+        registry = build_default_registry()
+        blocked = Context(
+            target="example.com",
+            mode="active",
+            policy=Policy(allowed_modes=["passive"], allowed_targets=["safe.example"]),
+        )
+        with self.assertRaises(PolicyViolationError):
+            registry.get("dns.passive", blocked)
+
 
 if __name__ == "__main__":
     unittest.main()

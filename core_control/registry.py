@@ -42,6 +42,12 @@ class ModuleRegistry:
         """
         policy = context.policy
 
+        if policy.allowed_modes is not None and context.mode not in policy.allowed_modes:
+            return False
+
+        if policy.allowed_targets is not None and context.target not in policy.allowed_targets:
+            return False
+
         # 1. Explicit deny-list has highest priority
         if policy.denied_modules is not None:
             if module_name in policy.denied_modules:

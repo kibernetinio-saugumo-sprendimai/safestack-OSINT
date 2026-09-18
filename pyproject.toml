@@ -27,9 +27,8 @@ ss-osint = "cli.ss_osint:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-  "adapters",
-  "cli",
-  "core_control",
-  "modules"
+  "adapters*",
+  "cli*",
+  "core_control*",
+  "modules*"
 ]
-

@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
+from core_control.safeio import append_no_follow
 
 
 class AuditLogger:
@@ -33,8 +34,7 @@ class AuditLogger:
             "summary": result_summary
         }
 
-        with open(log_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry) + "\n")
+        append_no_follow(log_file, (json.dumps(entry, sort_keys=True) + "\n").encode())
 
     def log_system_event(self, event_type: str, details: str):
         """
@@ -48,5 +48,4 @@ class AuditLogger:
             "details": details
         }
 
-        with open(log_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry) + "\n")
+        append_no_follow(log_file, (json.dumps(entry, sort_keys=True) + "\n").encode())

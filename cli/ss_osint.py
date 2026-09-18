@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+import sys
+from pathlib import Path
+
+# Ensure project root is on PYTHONPATH before importing project packages.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from core_control.reporting.signing import Signer
 from core_control.reporting.json_report import generate_json_report
 from core_control.policy import Policy
@@ -7,15 +14,10 @@ from core_control.exceptions import ModuleExecutionError
 from core_control.registry import build_default_registry
 from core_control.runner import Runner
 from core_control.context import Context
-import sys
+from core_control.safeio import atomic_write, read_regular
 import json
 import argparse
 import subprocess
-from pathlib import Path
-
-# Ensure project root is on PYTHONPATH
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 
 # -----------------------------
@@ -139,8 +141,7 @@ def main() -> int:
         )
 
         if args.report:
-            with open(args.report, "w") as f:
-                json.dump(report_data, f, indent=2)
+            atomic_write(args.report, (json.dumps(report_data, indent=2) + "\n").encode())
 
             # Try internal signer first if safestack.key exists
             key_path = PROJECT_ROOT / "safestack.key"
@@ -148,8 +149,7 @@ def main() -> int:
 
             if key_path.exists():
                 try:
-                    with open(key_path, "r") as kf:
-                        key_hex = kf.read().strip()
+                    key_hex = read_regular(key_path).decode("ascii").strip()
                     signer = Signer(key_hex)
                     if signer.sign_report(args.report):
                         print(

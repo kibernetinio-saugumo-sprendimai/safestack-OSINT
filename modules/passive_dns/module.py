@@ -56,9 +56,8 @@ class PassiveDNSModule:
     def _fallback(self, target: str, reason: str) -> Dict[str, Any]:
         return {
             "target": target,
-            "records": [
-                {"type": "A", "value": "93.184.216.34"}
-            ],
-            "note": f"fallback stub used ({reason})",
+            "records": [],
+            "error": "DNS_UNAVAILABLE",
+            "note": f"DNS lookup unavailable ({reason}); no records returned",
             "source": "stub"
         }
