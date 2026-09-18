@@ -33,6 +33,7 @@ class TLSInfoModule:
 
     def _probe_tls(self, host: str, port: int) -> Dict[str, Any]:
         context = ssl.create_default_context()
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
 
         with socket.create_connection((host, port), timeout=self.timeout) as sock:
             with context.wrap_socket(sock, server_hostname=host) as ssock:
