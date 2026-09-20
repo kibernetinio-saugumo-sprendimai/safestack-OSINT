@@ -1,180 +1,136 @@
 # SafeStack OSINT
 
-**SafeStack OSINT** – tai modulinis, politikomis valdomas OSINT framework’as,
-skirtas **kontroliuojamam**, **paaiškinamam** ir **kriptografiškai patikrinamam**
-informacijos rinkimui.
+**SafeStack OSINT** is a modular, policy-controlled OSINT framework for
+controlled, explainable and cryptographically verifiable information gathering.
 
-Projektas sąmoningai orientuotas ne į „kiekį“, o į:
-- atsakomybę
-- audituojamumą
-- techninį sąžiningumą
+The project prioritizes responsibility, auditability and technical honesty over
+collection volume.
 
 > **Your data. Your rules. Your trust chain.**
 
----
+## Features
 
-## ✨ Pagrindinės savybės
+- Modular OSINT architecture (DNS, WHOIS/RDAP and TLS)
+- Centralized **Policy** system defining what is allowed, when and how
+- `run all` execution mode
+- Deterministic confidence scoring
+- Risk flags and human-readable hints
+- JSON reports
+- Report signing with minisign
+- Offline report verification
 
-- Modulinė OSINT architektūra (DNS, WHOIS/RDAP, TLS)
-- Centralizuota **Policy** sistema (kas / kada / kaip leidžiama)
-- `run all` vykdymo režimas
-- Deterministinis **confidence scoring**
-- **Risk flags** ir **human-readable hints**
-- JSON ataskaitos
-- **Ataskaitų pasirašymas su minisign**
-- Offline ataskaitų verifikacija
+## Installation
 
----
-
-## 📦 Diegimas
-
-### 1. Virtual environment (rekomenduojama)
+### 1. Virtual environment (recommended)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-
 pip install -e .
 ```
 
-> Jei `pip install -e .` nepavyksta dėl trūkstamų priklausomybių, įdiekite jas ranka:
->
-> ```bash
-> pip install dnspython requests
-> ```
->
-> Ataskaitų pasirašymui reikalingas `minisign` įrankis (atsisiųskite iš https://jedisct1.github.io/minisign/).
+If editable installation fails because dependencies are missing:
 
-----------
-
-## 🚀 Naudojimas:
-
-### Vienas modulis:
-
-ss-osint run dns.passive example.com
-
-### Visi moduliai:
-
-ss-osint run all example.com
-
-### Su politika:
-
-ss-osint run all example.com --policy policy.json
-
-### Alternatyvus paleidimas per Python:
-
-python -m cli.ss_osint run all example.com
-
-### Windows Shell paleidimas
-
-Jei naudodami Windows shell norite paleisti projektą tiesiogiai, galite naudoti `run_osint.bat`:
-
-```bat
-run_osint.bat run all example.com
+```bash
+pip install dnspython requests
 ```
 
-Arba PowerShell:
+The `minisign` tool is required to sign reports. Download it from
+https://jedisct1.github.io/minisign/.
+
+## Usage
+
+Run one module:
+
+```bash
+ss-osint run dns.passive example.com
+```
+
+Run all modules:
+
+```bash
+ss-osint run all example.com
+```
+
+Use a policy:
+
+```bash
+ss-osint run all example.com --policy policy.json
+```
+
+Run through Python:
+
+```bash
+python -m cli.ss_osint run all example.com
+```
+
+On Windows, use `run_osint.bat` or PowerShell:
 
 ```powershell
 .\run_osint.ps1 run all example.com
 ```
 
-## 📄 Ataskaitos (Report)
+## Reports and verification
 
+```bash
 ss-osint run all example.com --policy policy.json --report report.json
+```
 
-## Rezultatas:
+The result includes `report.json` and `report.json.sig` (or `.minisig`). Verify
+offline:
 
-* report.json
-* report.json.sig (arba .minisig)
-
-#### 🔐 Report Verification (kritiškai svarbu)
-
---- SafeStack OSINT palaiko kriptografiškai pasirašytas ataskaitas.
-
-Verifikacija (offline):
-
+```bash
 minisign -V -m report.json -p safestack.pub
+```
 
+A successful verification confirms that the report was not modified and that it
+was signed by the expected source. It does not prove that the underlying
+information is complete or correct.
 
-Jei viskas teisinga:
+## Risk and confidence model
 
-Signature and comment signature verified
+Confidence is calculated only from successful modules and is deterministic.
+Example risk flags include `no_tls`, `multiple_ips` and `whois_private`.
 
+Human-readable hints can include:
 
-Tai garantuoja, kad:
+- “TLS is present and active.”
+- “Multiple IP addresses detected — likely CDN usage.”
+- “WHOIS registrar information is present and identifiable.”
 
-*ataskaita nebuvo pakeista
+## Project structure
 
-*ataskaita kilusi iš patikimo šaltinio
-
-### 🧠 Risk & Confidence modelis
-Confidence
-
-Skaičiuojamas tik iš sėkmingų modulių
-
-*Deterministinis (vidurkis)
-*Risk flags (pavyzdžiai)
-
-*no_tls
-*multiple_ips
-*whois_private
-
-Human-readable hints
-
-Pavyzdžiai:
-
-“TLS is present and active.”
-
-“Multiple IP addresses detected – likely CDN usage.”
-
-“WHOIS registrar information is present and identifiable.”
-
-### 🏗️ Projekto struktūra
-
+```text
 .
-├── adapters/          # Adapteriai (framework ↔ moduliai)
-├── cli/               # CLI
-│   ├── __init__.py
-│   ├── __main__.py
-│   └── ss_osint.py
-├── core_control/      # Aktyvus vykdymo branduolys
-│   ├── context.py
-│   ├── exceptions.py
-│   ├── module_contract.py
-│   ├── registry.py
-│   ├── reporting/
-│   ├── risk.py
-│   ├── result.py
-│   ├── runner.py
-│   └── policy.py
-├── docs/              # Dokumentacija
-├── modules/           # OSINT moduliai
-├── tests/             # Smoketestai ir integraciniai testai
-├── run_osint.bat      # Windows komandų paleidimo skriptas
-├── run_osint.ps1      # PowerShell paleidimo skriptas
+├── adapters/          # Framework-to-module adapters
+├── cli/               # CLI entry points
+├── core_control/      # Execution core, reporting, risk and policy
+├── docs/              # Documentation
+├── modules/           # OSINT modules
+├── tests/              # Smoke and integration tests
+├── run_osint.bat      # Windows launcher
+├── run_osint.ps1      # PowerShell launcher
 ├── pyproject.toml
 ├── README.md
 ├── LICENSE
 ├── CHANGELOG.md
-├── safestack.key      # Privatus verifikavimo raktas (offline)
-└── safestack.pub      # Viešas verifikavimo raktas
+├── safestack.key      # Offline private signing key; never publish it
+└── safestack.pub      # Public verification key
+```
 
-## 📚 Dokumentacija
+## Documentation
 
-Daugiau informacijos apie projektą rasite `docs/` kataloge:
+See the `docs/` directory:
 
-*   [**Politikos sistema**](docs/POLICY.md) – kaip konfigūruoti `policy.json`.
-*   [**Auditas ir atsekamumas**](docs/AUDIT.md) – apie žurnalizavimą, ataskaitų ir konfigūracijų pasirašymą.
-*   [**Modulių kūrimas**](docs/MODULES.md) – kaip pridėti naujus OSINT modulius.
-*   [**Konfigūravimas**](docs/CONFIGURATION.md) – aplinkos paruošimo gidas.
-*   [**Reprodukuojamumas**](docs/REPRODUCIBILITY.md) – apie tyrimų pakartojamumą.
+- [Policy system](docs/POLICY.md) — configure `policy.json`.
+- [Audit and traceability](docs/AUDIT.md) — logging and signing reports and configuration.
+- [Module development](docs/MODULES.md) — add a new OSINT module.
+- [Configuration](docs/CONFIGURATION.md) — prepare the environment.
+- [Reproducibility](docs/REPRODUCIBILITY.md) — repeat investigations consistently.
 
-## ⚠️ Versioning Notice
+## Versioning notice
 
-Earlier tags (`v0.2.0`, `v0.3.0`, `v0.4.0`, `v1.0.0`) were created during
-rapid and non-linear development and **do not represent stable or coherent releases**.
-
-They are preserved for historical reference only.
-
-Versioning discipline and release guarantees start from **v1.5.0** onward.
+Earlier tags (`v0.2.0`, `v0.3.0`, `v0.4.0` and `v1.0.0`) were created during
+rapid, non-linear development and do not represent stable or coherent releases.
+They are preserved for historical reference. Versioning discipline and release
+guarantees start from `v1.5.0` onward.

@@ -1,35 +1,45 @@
-# SafeStack OSINT – Galutinė Audito Ataskaita
-**Data ir laikas:** 2026-05-02 00:10:10 (Local Time)
-**Auditorius:** Antigravity AI  
-**Statusas:** ✅ **AUDIT PASSED / READY FOR PRODUCTION**
+# SafeStack OSINT — Final Audit Report
 
-## 1. Tikslas ir Apimtis
-Šio audito tikslas buvo įvertinti **SafeStack OSINT** karkaso saugumą, architektūrinį vientisumą ir parengtumą „Root of Trust“ aplinkai. Audito metu buvo tikrinamas kodas, priklausomybės, konfigūracijų saugumas ir kriptografinio pasirašymo mechanizmai.
+**Date and time:** 2026-05-02 00:10:10 (local time)
+**Auditor:** Antigravity AI
+**Status:** ✅ **AUDIT PASSED / READY FOR PRODUCTION**
 
-## 2. Esminiai Radiniai ir Atlikti Pakeitimai
+## 1. Objective and scope
 
-| Sritis | Pradinė būsena | Atliktas veiksmas | Rezultatas |
+This audit evaluated the SafeStack OSINT framework's security, architectural
+integrity and readiness for a Root of Trust environment. The review covered
+code, dependencies, configuration security and cryptographic signing.
+
+## 2. Key findings and changes
+
+| Area | Initial state | Action | Result |
 | :--- | :--- | :--- | :--- |
-| **Švara** | Buvo likę `legacy_core` ir pertekliniai skriptai. | Pašalinti visi nenaudojami failai ir katalogai. | **Gryna architektūra** |
-| **Reporting** | Logika buvo dubliuojama CLI lygmenyje. | Centralizuota ataskaitų generavimo logika branduolyje. | **Nuoseklumas** |
-| **Integrity** | Pasirašymas priklausė tik nuo išorinio įrankio. | Integruotas vidinis Ed25519 pasirašymo modulis. | **Autonominis saugumas** |
-| **Trust Chain** | Viešieji raktai buvo, bet nebuvo privataus rakto. | Integruotas **Root Private Key** (`safestack.key`). | **Root of Trust įtvirtintas** |
-| **Audit Log** | Nebuvo nuolatinio vykdymo žurnalizavimo. | Įdiegtas `AuditLogger`, fiksuojantis kiekvieną veiksmą. | **Pilnas atsekamumas** |
-| **Confidence** | Hardcoded balai (0.7). | Įdiegtas dinaminis pasitikėjimo balų skaičiavimas. | **Tikslus vertinimas** |
+| **Cleanliness** | Legacy core and redundant scripts remained. | Removed unused files and directories. | **Clean architecture** |
+| **Reporting** | Logic was duplicated at the CLI layer. | Centralized report generation in the core. | **Consistency** |
+| **Integrity** | Signing depended only on an external tool. | Added an internal Ed25519 signing module. | **Autonomous security** |
+| **Trust chain** | Public keys existed without a private key. | Integrated the **root private key** (`safestack.key`). | **Root of Trust anchored** |
+| **Audit log** | Continuous execution logging was absent. | Added `AuditLogger` to record every action. | **Full traceability** |
+| **Confidence** | Scores were hard-coded at 0.7. | Added dynamic confidence scoring. | **More precise assessment** |
 
-## 3. Saugumo Architektūra
-Sistema dabar naudoja hibridinį pasirašymo modelį:
-- **Konfigūracijų saugumas**: Visi pagrindiniai failai (.gitignore, pyproject.toml ir kt.) yra pasirašyti administratoriaus raktu.
-- **Rezultatų vientisumas**: Kiekviena OSINT ataskaita gauna skaitmeninį parašą, užtikrinantį, kad duomenys nebuvo pakeisti po skenavimo.
-- **Raktų apsauga**: Privatus raktas yra apsaugotas griežtomis `.gitignore` taisyklėmis.
+## 3. Security architecture
 
-## 4. Rekomendacijos Naudotojui
-1. **Raktų valdymas**: Saugokite `safestack.key` neprisijungusioje (offline) laikmenoje, jei planuojate sistemą naudoti kritinėje infrastruktūroje.
-2. **Politikos kontrolė**: Reguliariai peržiūrėkite `policy.json` nustatymus, kad jie atitiktų jūsų organizacijos teisinius reikalavimus.
-3. **Atnaujinimai**: Prieš pridedant naujus modulius, visada vadovaukitės `docs/MODULES.md` gidu, kad išlaikytumėte architektūrinį švarumą.
+The system uses a hybrid signing model:
 
-## 5. Išvada
-**SafeStack OSINT** sėkmingai transformuotas iš prototipo į aukšto patikimumo, modulį karkasą. Sistema yra visiškai audituota, saugi ir paruošta vykdyti OSINT operacijas „Zero-Trust“ aplinkoje.
+- **Configuration security:** core files such as `.gitignore` and `pyproject.toml` are signed by the administrator key.
+- **Result integrity:** every OSINT report receives a digital signature so changes after scanning can be detected.
+- **Key protection:** the private key is protected by strict `.gitignore` rules.
+
+## 4. Recommendations
+
+1. Store `safestack.key` on offline media when using the system for critical infrastructure.
+2. Review `policy.json` regularly so it remains aligned with organizational and legal requirements.
+3. Follow `docs/MODULES.md` before adding a module to preserve architectural consistency.
+
+## 5. Conclusion
+
+SafeStack OSINT was transformed from a prototype into a high-reliability,
+modular framework. The system passed this audit and is prepared for OSINT
+operations in a zero-trust environment.
 
 ---
-*Ši ataskaita yra kriptografiškai pasirašyta SafeStack parašo raktu.*
+*This report is cryptographically signed with the SafeStack signing key.*
